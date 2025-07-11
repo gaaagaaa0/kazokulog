@@ -19,7 +19,7 @@ const AIChat: React.FC<AIChatProps> = ({ familyAccessKey }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000');
 
   const sendMessage = async () => {
     if (!inputText.trim() || !familyAccessKey) return;

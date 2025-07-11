@@ -34,7 +34,7 @@ interface FamilyMember {
   relationship: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000');
 
 const KazokuLogApp: React.FC = () => {
   const [inputText, setInputText] = useState('');
