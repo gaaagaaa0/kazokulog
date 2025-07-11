@@ -169,6 +169,7 @@ const KazokuLogApp: React.FC = () => {
         const family = await response.json();
         setFamilyAccessKey(family.access_key);
         localStorage.setItem('familyAccessKey', family.access_key);
+        localStorage.setItem('familyName', JSON.stringify(family.name));
         alert(`家族「${family.name}」を作成しました。\nアクセスキー: ${family.access_key}`);
       } else {
         setError('家族の作成に失敗しました');
@@ -264,95 +265,110 @@ const KazokuLogApp: React.FC = () => {
     : logEntries.filter(entry => entry.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-rose-50 to-pink-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="max-w-6xl mx-auto">
         {/* ヘッダー */}
-        <header className="mb-8 text-center">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-orange-100">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-rose-600 bg-clip-text text-transparent mb-3">
-              🏠 KazokuLog
-            </h1>
-            <p className="text-orange-700 text-lg">あなたの家族専属のAIコンシェルジュ</p>
+        <header className="mb-8">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 shadow-lg text-white">
+            <div className="flex items-center">
+              <div className="bg-white/20 rounded-lg p-2 mr-4">
+                <span className="text-2xl">🏠</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">
+                  {familyAccessKey ? `${JSON.parse(localStorage.getItem('familyName') || '""') || '田中家'}のダッシュボード` : 'KazokuLog'}
+                </h1>
+                <p className="text-blue-100 text-sm">あなたの家族専属のAIコンシェルジュ</p>
+              </div>
+            </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 左側：設定エリア */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* 家族アクセスキー設定 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-orange-100">
-              <h2 className="text-xl font-bold text-orange-800 mb-4 flex items-center">
-                👨‍👩‍👧‍👦 家族設定
-              </h2>
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  value={familyAccessKey}
-                  onChange={(e) => setFamilyAccessKey(e.target.value)}
-                  placeholder="家族アクセスキーを入力"
-                  className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white/80"
-                />
-                <button
-                  onClick={createFamily}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-orange-400 to-rose-400 text-white rounded-xl hover:from-orange-500 hover:to-rose-500 transition-all shadow-lg transform hover:scale-105"
-                >
-                  ✨ 新しい家族を作成
-                </button>
-              </div>
+        {/* 家族設定エリア（未設定時のみ表示） */}
+        {!familyAccessKey && (
+          <div className="mb-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100">
+            <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
+              👨‍👩‍👧‍👦 家族設定
+            </h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={familyAccessKey}
+                onChange={(e) => setFamilyAccessKey(e.target.value)}
+                placeholder="家族アクセスキーを入力"
+                className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white/80"
+              />
+              <button
+                onClick={createFamily}
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg transform hover:scale-105"
+              >
+                ✨ 新しい家族を作成
+              </button>
             </div>
+          </div>
+        )}
 
-            {/* 日付・カテゴリ選択 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-orange-100">
-              <h2 className="text-xl font-bold text-orange-800 mb-4 flex items-center">
-                📅 表示設定
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-orange-700 mb-2">日付選択</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => handleDateChange(e.target.value)}
-                    className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white/80"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-orange-700 mb-2">カテゴリフィルタ</label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white/80"
-                  >
-                    <option value="all">すべて表示</option>
-                    {categories.map(cat => (
-                      <option key={cat.name} value={cat.name}>{cat.display_name}</option>
-                    ))}
-                  </select>
-                </div>
+        {/* メインダッシュボード */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* 予定管理 */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-all cursor-pointer">
+            <div className="text-center">
+              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📅</span>
               </div>
+              <h3 className="text-lg font-bold text-blue-800 mb-2">予定管理</h3>
+              <p className="text-sm text-blue-600">
+                {logEntries.filter(entry => entry.category === 'schedule').length}件の予定
+              </p>
             </div>
-
-            {/* 家族構成設定 */}
-            <FamilySettings
-              familyMembers={familyMembers}
-              onUpdateMembers={updateFamilyMembers}
-            />
-
-            {/* AIフィードバック */}
-            <AIFeedback logEntries={logEntries} />
-
-            {/* AIチャット */}
-            <AIChat familyAccessKey={familyAccessKey} />
-
-            {/* AI提案 */}
-            <AISuggestions familyAccessKey={familyAccessKey} />
           </div>
 
-          {/* 右側：ログエリア */}
+          {/* 感情ログ */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-orange-100 hover:shadow-xl transition-all cursor-pointer">
+            <div className="text-center">
+              <div className="bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">❤️</span>
+              </div>
+              <h3 className="text-lg font-bold text-orange-800 mb-2">感情ログ</h3>
+              <p className="text-sm text-orange-600">
+                {logEntries.filter(entry => entry.category === 'emotion').length}件の記録
+              </p>
+            </div>
+          </div>
+
+          {/* ToDo */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-green-100 hover:shadow-xl transition-all cursor-pointer">
+            <div className="text-center">
+              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✏️</span>
+              </div>
+              <h3 className="text-lg font-bold text-green-800 mb-2">ToDo</h3>
+              <p className="text-sm text-green-600">
+                {logEntries.filter(entry => entry.category === 'todo').length}件のタスク
+              </p>
+            </div>
+          </div>
+
+          {/* 買い物リスト */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-purple-100 hover:shadow-xl transition-all cursor-pointer">
+            <div className="text-center">
+              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🛒</span>
+              </div>
+              <h3 className="text-lg font-bold text-purple-800 mb-2">買い物リスト</h3>
+              <p className="text-sm text-purple-600">
+                {logEntries.filter(entry => entry.category === 'shopping').length}件のアイテム
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左側：ログ入力エリア */}
           <div className="lg:col-span-2 space-y-6">
             {/* ログ入力フォーム */}
-            <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-orange-100">
-              <h2 className="text-xl font-bold text-orange-800 mb-4 flex items-center">
+            <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100">
+              <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
                 ✍️ ログ入力
               </h2>
               <div className="space-y-4">
@@ -361,7 +377,7 @@ const KazokuLogApp: React.FC = () => {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="今日の出来事や気づいたことを入力してください..."
-                    className="w-full px-4 py-3 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none bg-white/80"
+                    className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none bg-white/80"
                     rows={4}
                   />
                   {speechSupported && (
@@ -370,7 +386,7 @@ const KazokuLogApp: React.FC = () => {
                         <button
                           type="button"
                           onClick={startSpeechRecognition}
-                          className="px-3 py-1 bg-orange-200 text-orange-700 hover:bg-orange-300 rounded-lg transition-all text-sm"
+                          className="px-3 py-1 bg-blue-200 text-blue-700 hover:bg-blue-300 rounded-lg transition-all text-sm"
                           title="音声入力を開始"
                         >
                           🎤 開始
@@ -391,7 +407,7 @@ const KazokuLogApp: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!inputText.trim() || !familyAccessKey || isLoading}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-rose-400 to-pink-400 text-white rounded-xl hover:from-rose-500 hover:to-pink-500 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-lg transform hover:scale-105"
+                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-lg transform hover:scale-105"
                 >
                   {isLoading ? '🔄 記録中...' : '💾 記録する'}
                 </button>
@@ -406,11 +422,11 @@ const KazokuLogApp: React.FC = () => {
             )}
 
             {/* ログ一覧 */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-orange-100">
-              <h2 className="text-xl font-bold text-orange-800 mb-4 flex items-center">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100">
+              <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
                 📖 {format(new Date(selectedDate), 'yyyy年MM月dd日', { locale: ja })}のログ
                 {selectedCategory !== 'all' && (
-                  <span className="ml-2 text-sm bg-orange-200 text-orange-800 px-2 py-1 rounded-full">
+                  <span className="ml-2 text-sm bg-blue-200 text-blue-800 px-2 py-1 rounded-full">
                     {categories.find(cat => cat.name === selectedCategory)?.display_name}
                   </span>
                 )}
@@ -418,11 +434,11 @@ const KazokuLogApp: React.FC = () => {
               
               {isLoading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-                  <p className="mt-4 text-orange-700">読み込み中...</p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-blue-700">読み込み中...</p>
                 </div>
               ) : filteredEntries.length === 0 ? (
-                <div className="text-center py-12 text-orange-500">
+                <div className="text-center py-12 text-blue-500">
                   <div className="text-6xl mb-4">📝</div>
                   <p>この日のログはまだありません</p>
                   <p className="text-sm mt-2">上のフォームから記録を始めましょう</p>
@@ -472,6 +488,55 @@ const KazokuLogApp: React.FC = () => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* 右側：AIサイドバー */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* 日付・カテゴリ選択 */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100">
+              <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                📅 表示設定
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-2">日付選択</label>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                    className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white/80"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-2">カテゴリフィルタ</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white/80"
+                  >
+                    <option value="all">すべて表示</option>
+                    {categories.map(cat => (
+                      <option key={cat.name} value={cat.name}>{cat.display_name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* 家族構成設定 */}
+            <FamilySettings
+              familyMembers={familyMembers}
+              onUpdateMembers={updateFamilyMembers}
+            />
+
+            {/* AIフィードバック */}
+            <AIFeedback logEntries={logEntries} />
+
+            {/* AIチャット */}
+            <AIChat familyAccessKey={familyAccessKey} />
+
+            {/* AI提案 */}
+            <AISuggestions familyAccessKey={familyAccessKey} />
           </div>
         </div>
       </div>
