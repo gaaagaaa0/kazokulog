@@ -34,7 +34,12 @@ const AIFeedback: React.FC<AIFeedbackProps> = ({ logEntries }) => {
 
   const generateInsights = () => {
     if (logEntries.length === 0) {
-      setInsights([]);
+      setInsights([{
+        type: 'neutral',
+        title: '記録を始めましょう',
+        message: 'ログを記録すると、AIが家族の様子を分析してフィードバックを提供します。',
+        icon: '📝'
+      }]);
       return;
     }
 

@@ -92,7 +92,19 @@ const AIChat: React.FC<AIChatProps> = ({ familyAccessKey }) => {
   };
 
   if (!familyAccessKey) {
-    return null;
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-orange-100">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-orange-800 flex items-center">
+            💬 AIチャット
+          </h3>
+        </div>
+        <div className="text-center py-8 text-orange-500">
+          <div className="text-4xl mb-3">🤖</div>
+          <p className="text-sm">家族を設定するとAIチャットが利用できます</p>
+        </div>
+      </div>
+    );
   }
 
   return (
